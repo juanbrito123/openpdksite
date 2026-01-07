@@ -1,8 +1,7 @@
-
 import React, { useState, useEffect, useRef } from 'react';
-import { TRANSLATIONS, LANGUAGES, LanguageCode, RESOURCES } from './constants';
-import { CpuIcon, LayersIcon, ExternalLinkIcon, ToolIcon } from './components/Icons';
-import { PDKOption, Tool, FlowStep, ResourceLink } from './types';
+import { TRANSLATIONS, LANGUAGES, LanguageCode, RESOURCES } from './constants.tsx';
+import { CpuIcon, LayersIcon, ExternalLinkIcon, ToolIcon } from './components/Icons.tsx';
+import { PDKOption, Tool, FlowStep } from './types.ts';
 
 type Page = 'home' | 'pdk' | 'tools' | 'flow' | 'resources';
 
@@ -26,7 +25,6 @@ const App: React.FC = () => {
     window.scrollTo(0, 0);
   }, [page]);
 
-  // Global search logic
   const getSearchResults = (): SearchResult[] => {
     if (!searchQuery.trim()) return [];
     const query = searchQuery.toLowerCase();
@@ -91,62 +89,6 @@ const App: React.FC = () => {
     </button>
   );
 
-  // SearchBar JSX (inlined to prevent re-mounting focus issues)
-  const searchBarJSX = (
-    <div className="relative w-full" ref={searchRef}>
-      <div className="relative group">
-        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-          <svg className="h-4 w-4 text-slate-400 group-focus-within:text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-          </svg>
-        </div>
-        <input
-          type="text"
-          className="block w-full pl-10 pr-3 py-2 border border-slate-200 rounded-lg text-sm placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 bg-slate-50 transition-all"
-          placeholder="Search tools, PDKs..."
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          onFocus={() => setIsSearchFocused(true)}
-        />
-      </div>
-
-      {isSearchFocused && searchQuery && (
-        <div className="absolute mt-2 w-full sm:w-[420px] left-0 sm:left-auto sm:-right-4 bg-white border border-slate-200 rounded-xl shadow-2xl z-[100] max-h-[480px] overflow-hidden flex flex-col">
-          <div className="p-3 border-b border-slate-50 bg-slate-50/50 flex justify-between items-center">
-            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Search Results</span>
-            <span className="text-[10px] text-slate-400">{searchResults.length} items found</span>
-          </div>
-          <div className="overflow-y-auto flex-1">
-            {searchResults.length > 0 ? (
-              searchResults.map((res, i) => (
-                <button
-                  key={i}
-                  onClick={() => handleResultClick(res)}
-                  className="w-full text-left p-4 hover:bg-emerald-50 border-b border-slate-50 last:border-0 transition-colors flex gap-3 group"
-                >
-                  <div className="mt-1 h-8 w-8 rounded-lg bg-slate-100 flex items-center justify-center text-slate-400 group-hover:bg-emerald-100 group-hover:text-emerald-600 shrink-0">
-                    {res.type === 'PDK' ? <CpuIcon /> : res.type === 'Tool' ? <ToolIcon /> : <ExternalLinkIcon />}
-                  </div>
-                  <div>
-                    <div className="flex items-center gap-2 mb-0.5">
-                      <span className="font-bold text-slate-900 text-sm group-hover:text-emerald-700">{res.title}</span>
-                      <span className="text-[9px] font-black uppercase text-slate-400 border border-slate-200 px-1.5 rounded">{res.type}</span>
-                    </div>
-                    <p className="text-xs text-slate-500 line-clamp-1">{res.description}</p>
-                  </div>
-                </button>
-              ))
-            ) : (
-              <div className="p-12 text-center">
-                <p className="text-sm text-slate-400 italic">No matches for "{searchQuery}"</p>
-              </div>
-            )}
-          </div>
-        </div>
-      )}
-    </div>
-  );
-
   const renderContent = () => {
     switch (page) {
       case 'home': return <LandingPage t={t} setPage={setPage} />;
@@ -169,8 +111,44 @@ const App: React.FC = () => {
           <span className="font-bold text-lg text-emerald-900 tracking-tight">OpenIC <span className="text-emerald-500 underline decoration-2 underline-offset-4">Hub</span></span>
         </div>
         
-        <div className="px-4 pt-6 pb-2">
-          {searchBarJSX}
+        <div className="px-4 pt-6 pb-2" ref={searchRef}>
+          <div className="relative group">
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <svg className="h-4 w-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+            </div>
+            <input
+              type="text"
+              className="block w-full pl-10 pr-3 py-2 border border-slate-200 rounded-lg text-sm placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 bg-slate-50"
+              placeholder="Search..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              onFocus={() => setIsSearchFocused(true)}
+            />
+          </div>
+          {isSearchFocused && searchQuery && (
+            <div className="absolute mt-2 w-full left-0 px-4 z-[100]">
+              <div className="bg-white border border-slate-200 rounded-xl shadow-2xl max-h-[400px] overflow-y-auto">
+                {searchResults.length > 0 ? (
+                  searchResults.map((res, i) => (
+                    <button key={i} onClick={() => handleResultClick(res)} className="w-full text-left p-4 hover:bg-emerald-50 border-b border-slate-50 last:border-0 flex gap-3 group">
+                      <div className="mt-1 h-8 w-8 rounded-lg bg-slate-100 flex items-center justify-center group-hover:bg-emerald-100 group-hover:text-emerald-600 shrink-0">
+                        {res.type === 'PDK' ? <CpuIcon /> : res.type === 'Tool' ? <ToolIcon /> : <ExternalLinkIcon />}
+                      </div>
+                      <div>
+                        <div className="flex items-center gap-2 mb-0.5">
+                          <span className="font-bold text-slate-900 text-sm">{res.title}</span>
+                          <span className="text-[9px] font-black uppercase text-slate-400 border border-slate-200 px-1.5 rounded">{res.type}</span>
+                        </div>
+                        <p className="text-xs text-slate-500 line-clamp-1">{res.description}</p>
+                      </div>
+                    </button>
+                  ))
+                ) : (
+                  <div className="p-8 text-center text-sm text-slate-400 italic">No results found</div>
+                )}
+              </div>
+            </div>
+          )}
         </div>
 
         <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
@@ -185,13 +163,7 @@ const App: React.FC = () => {
         <div className="p-4 border-t border-slate-100">
           <div className="flex items-center bg-slate-100 p-1 rounded-lg w-full">
             {LANGUAGES.map((l) => (
-              <button
-                key={l.code}
-                onClick={() => setLang(l.code)}
-                className={`flex-1 py-1.5 text-[10px] font-bold rounded-md transition-all ${
-                  lang === l.code ? 'bg-white text-emerald-600 shadow-sm' : 'text-slate-500 hover:text-slate-800'
-                }`}
-              >
+              <button key={l.code} onClick={() => setLang(l.code)} className={`flex-1 py-1.5 text-[10px] font-bold rounded-md transition-all ${lang === l.code ? 'bg-white text-emerald-600 shadow-sm' : 'text-slate-500 hover:text-slate-800'}`}>
                 {l.label}
               </button>
             ))}
@@ -200,34 +172,23 @@ const App: React.FC = () => {
       </aside>
 
       {/* Mobile Header */}
-      <header className="md:hidden bg-white border-b border-slate-200 sticky top-0 z-50">
-        <div className="flex items-center justify-between p-4">
-          <div className="flex items-center gap-2">
-            <div className="brazil-gradient p-1 rounded-md text-white">
-              <CpuIcon />
-            </div>
-            <span className="font-bold text-emerald-900">OpenIC Hub</span>
-          </div>
-          <div className="flex gap-2">
-            {LANGUAGES.map((l) => (
-              <button
-                key={l.code}
-                onClick={() => setLang(l.code)}
-                className={`px-2 py-1 text-[10px] font-bold rounded ${lang === l.code ? 'bg-emerald-100 text-emerald-700' : 'text-slate-400'}`}
-              >
-                {l.label}
-              </button>
-            ))}
-          </div>
+      <header className="md:hidden bg-white border-b border-slate-200 sticky top-0 z-50 p-4 flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <div className="brazil-gradient p-1 rounded-md text-white"><CpuIcon /></div>
+          <span className="font-bold text-emerald-900">OpenIC Hub</span>
         </div>
-        <div className="px-4 pb-4">
-          {searchBarJSX}
+        <div className="flex gap-2">
+          {LANGUAGES.map((l) => (
+            <button key={l.code} onClick={() => setLang(l.code)} className={`px-2 py-1 text-[10px] font-bold rounded ${lang === l.code ? 'bg-emerald-100 text-emerald-700' : 'text-slate-400'}`}>
+              {l.label}
+            </button>
+          ))}
         </div>
       </header>
 
       {/* Main Content */}
       <main className="flex-1 flex flex-col min-h-screen relative overflow-x-hidden technical-grid">
-        <div className="flex-1 p-4 md:p-10 max-w-7xl w-full mx-auto">
+        <div className="flex-1 p-6 md:p-10 max-w-7xl w-full mx-auto">
           <div className="flex items-center gap-2 text-xs text-slate-400 mb-8 px-1">
             <span className="hover:text-emerald-600 cursor-pointer" onClick={() => setPage('home')}>Root</span>
             <span>/</span>
@@ -263,12 +224,7 @@ const App: React.FC = () => {
 };
 
 const MobileNavItem: React.FC<{ active: boolean; icon: React.ReactNode; onClick: () => void }> = ({ active, icon, onClick }) => (
-  <button 
-    onClick={onClick} 
-    className={`p-3 rounded-2xl transition-all ${active ? 'bg-emerald-600 text-white shadow-lg' : 'text-slate-400 active:scale-95'}`}
-  >
-    {icon}
-  </button>
+  <button onClick={onClick} className={`p-3 rounded-2xl transition-all ${active ? 'bg-emerald-600 text-white shadow-lg' : 'text-slate-400 active:scale-95'}`}>{icon}</button>
 );
 
 const LandingPage: React.FC<{ t: any; setPage: (p: Page) => void }> = ({ t, setPage }) => (
@@ -276,37 +232,21 @@ const LandingPage: React.FC<{ t: any; setPage: (p: Page) => void }> = ({ t, setP
     <div className="bg-white p-10 md:p-16 rounded-[2.5rem] shadow-sm border border-slate-200 relative overflow-hidden">
       <div className="absolute top-0 right-0 w-80 h-80 bg-emerald-50 rounded-bl-full -z-0 opacity-40 blur-3xl" />
       <div className="relative z-10 max-w-4xl">
-        <h1 className="text-5xl md:text-6xl font-black text-slate-900 leading-[1.1] mb-8 tracking-tight">
-          {t.hero.title}
-        </h1>
-        <p className="text-xl text-slate-600 leading-relaxed mb-10 max-w-2xl font-medium">
-          {t.hero.description}
-        </p>
+        <h1 className="text-4xl md:text-5xl font-black text-slate-900 leading-[1.1] mb-8 tracking-tight">{t.hero.title}</h1>
+        <p className="text-lg text-slate-600 leading-relaxed mb-10 max-w-2xl font-medium">{t.hero.description}</p>
         <div className="flex flex-wrap gap-4">
-          <button 
-            onClick={() => setPage('flow')}
-            className="px-8 py-4 bg-emerald-600 text-white font-bold rounded-xl hover:bg-emerald-700 transition-all shadow-xl shadow-emerald-200 active:scale-95"
-          >
-            {t.hero.cta}
-          </button>
-          <button 
-            onClick={() => setPage('pdk')}
-            className="px-8 py-4 bg-white text-slate-700 font-bold rounded-xl border border-slate-300 hover:bg-slate-50 transition-all active:scale-95"
-          >
-            Explore Tech Specs
-          </button>
+          <button onClick={() => setPage('flow')} className="px-8 py-4 bg-emerald-600 text-white font-bold rounded-xl hover:bg-emerald-700 transition-all shadow-xl shadow-emerald-200 active:scale-95">{t.hero.cta}</button>
+          <button onClick={() => setPage('pdk')} className="px-8 py-4 bg-white text-slate-700 font-bold rounded-xl border border-slate-300 hover:bg-slate-50 transition-all active:scale-95">Explore Tech Specs</button>
         </div>
       </div>
     </div>
-
     <div className="grid md:grid-cols-2 gap-8">
       <div className="bg-white p-8 rounded-3xl shadow-sm border border-slate-200 flex flex-col">
         <h3 className="text-xs font-black text-slate-400 uppercase tracking-[0.2em] mb-6 border-b border-slate-100 pb-4">Ecosystem Architecture</h3>
         <ul className="space-y-5 flex-1">
           {t.intro.bullets.map((b: string, i: number) => (
             <li key={i} className="flex items-start gap-4 text-slate-700 text-[15px] font-semibold">
-              <div className="mt-1.5 h-2 w-2 rounded-full bg-emerald-500 shrink-0 shadow-sm shadow-emerald-200" />
-              {b}
+              <div className="mt-1.5 h-2 w-2 rounded-full bg-emerald-500 shrink-0 shadow-sm shadow-emerald-200" />{b}
             </li>
           ))}
         </ul>
@@ -315,9 +255,7 @@ const LandingPage: React.FC<{ t: any; setPage: (p: Page) => void }> = ({ t, setP
         <div className="absolute inset-0 organic-pattern opacity-10 group-hover:opacity-20 transition-opacity" />
         <h3 className="text-2xl font-black mb-4 relative z-10 tracking-tight">{t.pdkSection.title}</h3>
         <p className="text-emerald-100/70 text-sm mb-8 relative z-10 font-medium leading-relaxed">{t.pdkSection.description}</p>
-        <button onClick={() => setPage('pdk')} className="self-start bg-emerald-800/50 hover:bg-emerald-700 px-6 py-3 rounded-xl border border-emerald-700 text-amber-400 font-bold text-sm transition-all relative z-10 active:scale-95">
-          Access Documentation Modules →
-        </button>
+        <button onClick={() => setPage('pdk')} className="self-start bg-emerald-800/50 hover:bg-emerald-700 px-6 py-3 rounded-xl border border-emerald-700 text-amber-400 font-bold text-sm transition-all relative z-10 active:scale-95">Access Documentation →</button>
       </div>
     </div>
   </div>
@@ -328,12 +266,12 @@ const PDKPage: React.FC<{ t: any }> = ({ t }) => (
     <div className="flex items-center justify-between px-2">
       <div className="max-w-xl">
         <h2 className="text-3xl font-black text-slate-900 tracking-tight">{t.pdkSection.title}</h2>
-        <p className="text-sm text-slate-500 mt-2 font-medium">Standard process design kits for research and industrial prototyping in open silicon.</p>
+        <p className="text-sm text-slate-500 mt-2 font-medium">Standard process design kits for research and industrial prototyping.</p>
       </div>
     </div>
     <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden overflow-x-auto">
       <table className="w-full text-left border-collapse min-w-[700px]">
-        <thead className="bg-slate-50/80 border-b border-slate-200">
+        <thead className="bg-slate-50 border-b border-slate-200">
           <tr>
             <th className="px-8 py-5 text-[11px] font-black text-slate-400 uppercase tracking-widest w-1/4">Process Technology</th>
             <th className="px-8 py-5 text-[11px] font-black text-slate-400 uppercase tracking-widest">Technical Specifications</th>
@@ -342,28 +280,22 @@ const PDKPage: React.FC<{ t: any }> = ({ t }) => (
         </thead>
         <tbody className="divide-y divide-slate-100">
           {t.pdkSection.options.map((pdk: PDKOption) => (
-            <tr key={pdk.id} id={pdk.id} className="hover:bg-emerald-50/30 transition-colors group">
+            <tr key={pdk.id} id={pdk.id} className="hover:bg-emerald-50/30 transition-colors">
               <td className="px-8 py-8 align-top">
-                <div className="font-extrabold text-slate-900 text-lg mb-2 group-hover:text-emerald-700 transition-colors">{pdk.name}</div>
+                <div className="font-extrabold text-slate-900 text-lg mb-2">{pdk.name}</div>
                 <div className="text-[10px] mono font-bold bg-emerald-50 text-emerald-600 px-2 py-1 rounded inline-block border border-emerald-100">REV: 02.2025</div>
               </td>
               <td className="px-8 py-8 align-top">
                 <p className="text-sm text-slate-600 leading-relaxed mb-6 font-medium">{pdk.techSummary}</p>
                 <div className="flex flex-wrap gap-2">
                   {pdk.useCases.map((uc, i) => (
-                    <span key={i} className="text-[10px] font-bold text-slate-500 bg-slate-100 px-3 py-1 rounded-md border border-slate-200">
-                      {uc}
-                    </span>
+                    <span key={i} className="text-[10px] font-bold text-slate-500 bg-slate-100 px-3 py-1 rounded-md border border-slate-200">{uc}</span>
                   ))}
                 </div>
               </td>
               <td className="px-8 py-8 align-top text-right space-y-3">
-                <a href={pdk.docsLink} target="_blank" className="flex items-center gap-2 text-[11px] font-black uppercase tracking-wider text-emerald-600 hover:text-emerald-700 bg-white px-4 py-2.5 rounded-lg border border-emerald-200 w-full justify-center shadow-sm hover:shadow-md transition-all">
-                  Documentation <ExternalLinkIcon />
-                </a>
-                <a href={pdk.mpwLink} target="_blank" className="flex items-center gap-2 text-[11px] font-black uppercase tracking-wider text-amber-600 hover:text-amber-700 bg-white px-4 py-2.5 rounded-lg border border-amber-200 w-full justify-center shadow-sm hover:shadow-md transition-all">
-                  MPW Access <ExternalLinkIcon />
-                </a>
+                <a href={pdk.docsLink} target="_blank" className="flex items-center gap-2 text-[11px] font-black uppercase tracking-wider text-emerald-600 hover:text-emerald-700 bg-white px-4 py-2.5 rounded-lg border border-emerald-200 w-full justify-center shadow-sm">Docs <ExternalLinkIcon /></a>
+                <a href={pdk.mpwLink} target="_blank" className="flex items-center gap-2 text-[11px] font-black uppercase tracking-wider text-amber-600 hover:text-amber-700 bg-white px-4 py-2.5 rounded-lg border border-amber-200 w-full justify-center shadow-sm">MPW <ExternalLinkIcon /></a>
               </td>
             </tr>
           ))}
@@ -379,21 +311,16 @@ const ToolsPage: React.FC<{ t: any }> = ({ t }) => (
       <h2 className="text-3xl font-black text-slate-900 tracking-tight">{t.toolsSection.title}</h2>
       <p className="text-sm text-slate-500 mt-2 max-w-2xl font-medium">{t.toolsSection.description}</p>
     </div>
-    <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
+    <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
       {t.toolsSection.tools.map((tool: Tool) => (
-        <div key={tool.id} id={tool.id} className="bg-white p-8 rounded-[2rem] border border-slate-200 shadow-sm hover:shadow-xl transition-all relative group flex flex-col">
+        <div key={tool.id} id={tool.id} className="bg-white p-8 rounded-[2rem] border border-slate-200 shadow-sm hover:shadow-xl transition-all group flex flex-col">
           <div className="flex justify-between items-start mb-6">
             <div className="font-black text-xl text-slate-900 group-hover:text-emerald-600 transition-colors tracking-tight">{tool.name}</div>
-            <span className="text-[10px] font-black bg-slate-100 text-slate-500 px-3 py-1 rounded-full uppercase tracking-tighter border border-slate-200">{tool.category}</span>
+            <span className="text-[10px] font-black bg-slate-100 text-slate-500 px-3 py-1 rounded-full uppercase border border-slate-200">{tool.category}</span>
           </div>
           <p className="text-sm text-slate-600 leading-relaxed mb-8 flex-1 font-medium">{tool.description}</p>
-          <div className="bg-emerald-50/50 p-4 rounded-2xl border border-emerald-100 mb-8">
-            <span className="text-[9px] font-black text-emerald-400 uppercase tracking-widest block mb-2">Build/Install Status</span>
-            <p className="text-[11px] text-emerald-700 font-bold leading-normal">{tool.installTip}</p>
-          </div>
-          <a href={tool.website} target="_blank" className="inline-flex items-center gap-2 text-xs font-black uppercase tracking-wider text-emerald-600 hover:text-emerald-800 transition-colors">
-            {t.toolsSection.visitSite} <ExternalLinkIcon />
-          </a>
+          <div className="bg-emerald-50/50 p-4 rounded-2xl border border-emerald-100 mb-8 text-[11px] text-emerald-700 font-bold">{tool.installTip}</div>
+          <a href={tool.website} target="_blank" className="inline-flex items-center gap-2 text-xs font-black uppercase tracking-wider text-emerald-600 hover:text-emerald-800">{t.toolsSection.visitSite} <ExternalLinkIcon /></a>
         </div>
       ))}
     </div>
@@ -406,48 +333,26 @@ const FlowPage: React.FC<{ t: any }> = ({ t }) => (
       <h2 className="text-3xl font-black text-slate-900 tracking-tight">{t.flowSection.title}</h2>
       <p className="text-sm text-slate-500 mt-2 font-medium">{t.flowSection.description}</p>
     </div>
-    <div className="relative">
-      <div className="absolute top-0 left-10 h-full w-1 bg-gradient-to-b from-emerald-500 to-amber-500 opacity-20 hidden md:block rounded-full" />
-      <div className="space-y-10">
-        {t.flowSection.steps.map((step: FlowStep) => (
-          <div key={step.id} className="flex flex-col md:flex-row gap-10 relative group">
-            <div className="h-20 w-20 shrink-0 bg-white border-4 border-slate-100 rounded-[2.5rem] flex items-center justify-center font-black text-3xl text-slate-300 shadow-sm z-10 group-hover:border-emerald-500 group-hover:text-emerald-600 transition-all group-hover:scale-105 group-hover:-rotate-3">
-              {step.id}
-            </div>
-            <div className="bg-white p-8 md:p-10 rounded-[2.5rem] border border-slate-200 shadow-sm flex-1 group-hover:shadow-md transition-shadow">
-              <h4 className="text-2xl font-black text-slate-900 mb-4 tracking-tight">{step.label}</h4>
-              <p className="text-base text-slate-600 leading-relaxed font-medium">{step.details}</p>
-            </div>
-          </div>
-        ))}
-      </div>
+    <div className="space-y-10 relative">
+      <div className="absolute top-0 left-10 h-full w-1 bg-slate-200 hidden md:block rounded-full opacity-50" />
+      {t.flowSection.steps.map((step: FlowStep) => (
+        <div key={step.id} className="flex flex-col md:flex-row gap-10 relative group">
+          <div className="h-20 w-20 shrink-0 bg-white border-4 border-slate-100 rounded-[2.5rem] flex items-center justify-center font-black text-3xl text-slate-300 shadow-sm z-10 group-hover:text-emerald-600 group-hover:border-emerald-500 transition-all">{step.id}</div>
+          <div className="bg-white p-10 rounded-[2.5rem] border border-slate-200 shadow-sm flex-1"><h4 className="text-2xl font-black text-slate-900 mb-4 tracking-tight">{step.label}</h4><p className="text-base text-slate-600 leading-relaxed font-medium">{step.details}</p></div>
+        </div>
+      ))}
     </div>
   </div>
 );
 
 const ResourcesPage: React.FC<{ t: any }> = ({ t }) => (
   <div className="space-y-10">
-    <div className="px-2">
-      <h2 className="text-3xl font-black text-slate-900 tracking-tight">{t.resourcesSection.title}</h2>
-      <p className="text-sm text-slate-500 mt-2 font-medium">{t.resourcesSection.description}</p>
-    </div>
+    <div className="px-2"><h2 className="text-3xl font-black text-slate-900 tracking-tight">{t.resourcesSection.title}</h2><p className="text-sm text-slate-500 mt-2 font-medium">{t.resourcesSection.description}</p></div>
     <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
       {RESOURCES.map((link, idx) => (
-        <a 
-          key={idx} 
-          href={link.url} 
-          target="_blank" 
-          rel="noopener noreferrer"
-          className="flex flex-col p-8 bg-white rounded-[2rem] border border-slate-200 shadow-sm hover:border-emerald-300 hover:shadow-2xl transition-all group active:scale-[0.98]"
-        >
-          <div className="flex items-center justify-between mb-6">
-            <div className={`p-3 rounded-2xl ${link.type === 'github' ? 'bg-slate-100 text-slate-600' : 'bg-emerald-50 text-emerald-600 shadow-inner'}`}>
-              {link.type === 'github' ? <ToolIcon /> : <ExternalLinkIcon />}
-            </div>
-            <span className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">{link.type}</span>
-          </div>
-          <h4 className="font-extrabold text-xl text-slate-900 group-hover:text-emerald-600 transition-colors mb-3 tracking-tight">{link.title}</h4>
-          <p className="text-sm text-slate-500 leading-relaxed font-medium">{link.description}</p>
+        <a key={idx} href={link.url} target="_blank" rel="noopener noreferrer" className="flex flex-col p-8 bg-white rounded-[2rem] border border-slate-200 shadow-sm hover:border-emerald-300 hover:shadow-2xl transition-all group">
+          <div className="flex items-center justify-between mb-6"><div className={`p-3 rounded-2xl ${link.type === 'github' ? 'bg-slate-100 text-slate-600' : 'bg-emerald-50 text-emerald-600'}`}>{link.type === 'github' ? <ToolIcon /> : <ExternalLinkIcon />}</div><span className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">{link.type}</span></div>
+          <h4 className="font-extrabold text-xl text-slate-900 group-hover:text-emerald-600 transition-colors mb-3 tracking-tight">{link.title}</h4><p className="text-sm text-slate-500 leading-relaxed font-medium">{link.description}</p>
         </a>
       ))}
     </div>

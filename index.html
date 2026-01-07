@@ -12,7 +12,7 @@
     body {
       font-family: 'Inter', sans-serif;
       scroll-behavior: smooth;
-      background-color: #f4f5f7; /* Jira-like background */
+      background-color: #f4f5f7;
     }
     .mono {
       font-family: 'JetBrains Mono', monospace;
@@ -26,10 +26,6 @@
         linear-gradient(to bottom, rgba(0,0,0,0.03) 1px, transparent 1px);
       background-size: 20px 20px;
     }
-    .sidebar-active {
-      background-color: #ebecf0;
-      color: #0052cc;
-    }
     @keyframes fadeIn {
       from { opacity: 0; transform: translateY(10px); }
       to { opacity: 1; transform: translateY(0); }
@@ -37,18 +33,24 @@
     .animate-in {
       animation: fadeIn 0.4s ease-out forwards;
     }
+    .organic-pattern {
+      background-image: radial-gradient(#10b981 0.5px, transparent 0.5px);
+      background-size: 24px 24px;
+    }
   </style>
-<script type="importmap">
-{
-  "imports": {
-    "react/": "https://esm.sh/react@^19.2.3/",
-    "react": "https://esm.sh/react@^19.2.3",
-    "react-dom/": "https://esm.sh/react-dom@^19.2.3/"
+  <script type="importmap">
+  {
+    "imports": {
+      "react": "https://esm.sh/react@19.0.0",
+      "react/": "https://esm.sh/react@19.0.0/",
+      "react-dom": "https://esm.sh/react-dom@19.0.0",
+      "react-dom/": "https://esm.sh/react-dom@19.0.0/"
+    }
   }
-}
-</script>
+  </script>
 </head>
 <body class="text-slate-900 antialiased overflow-x-hidden">
   <div id="root"></div>
+  <script type="module" src="index.tsx"></script>
 </body>
 </html>

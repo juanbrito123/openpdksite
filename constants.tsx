@@ -1,6 +1,5 @@
-
 import React from 'react';
-import { ContentTranslation, ResourceLink } from './types';
+import { ContentTranslation, ResourceLink } from './types.ts';
 
 export const LANGUAGES = [
   { code: 'pt', label: 'PT' },
@@ -58,8 +57,8 @@ export const TRANSLATIONS: Record<LanguageCode, ContentTranslation> = {
           id: 'gf',
           name: 'GlobalFoundries 180MCU',
           description: '180nm CMOS para aplicações IoT.',
-          details: 'PDK flexível para prototipagem rápida.',
-          techSummary: 'Tecnologia de 180nm otimizada para microcontroladores e aplicações de sinal misto, com suporte completo no ecossistema Google Open MPW.',
+          details: 'PDK flexible para prototipagem rápida.',
+          techSummary: 'Tecnologia de 180nm otimizada para microcontroladores e aplicações de sinal mixta, com suporte completo no ecossistema Google Open MPW.',
           useCases: ['Sistemas embarcados', 'Interface de sensores', 'Educação em VLSI'],
           docsLink: 'https://github.com/google/gf180mcu-pdk',
           mpwLink: 'https://efabless.com/open_shuttle_program'
@@ -278,7 +277,7 @@ export const TRANSLATIONS: Record<LanguageCode, ContentTranslation> = {
     resourcesSection: {
       title: 'Enlaces y Recursos',
       description: 'Conéctese con la comunidad y profundice sus conocimientos.',
-      roadmapTitle: 'Próximos Pasos',
+      roadmapTitle: 'Próximos Passos',
       roadmapDescription: 'Estamos expandiendo nuestra red de colaboración en toda la región.',
       roadmapFeatures: ['Tutoriales en PT/ES', 'Talleres Regionales', 'Bibliotecas de IP abiertas']
     },
