@@ -1,0 +1,5 @@
+{
+  "name": "OpenSource IC Prototyping Hub",
+  "description": "A minimal landing page presenting an overview of the open-source IC design ecosystem, including OpenPDKs and open-source EDA tools.",
+  "requestFramePermissions": []
+}
