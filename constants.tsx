@@ -2,9 +2,9 @@ import React from 'react';
 import { ContentTranslation, ResourceLink } from './types.ts';
 
 export const LANGUAGES = [
-  { code: 'pt', label: 'PT' },
-  { code: 'en', label: 'EN' },
-  { code: 'es', label: 'ES' }
+  { code: 'pt', label: 'Português' },
+  { code: 'en', label: 'English' },
+  { code: 'es', label: 'Español' }
 ] as const;
 
 export type LanguageCode = (typeof LANGUAGES)[number]['code'];
@@ -202,7 +202,7 @@ export const TRANSLATIONS: Record<LanguageCode, ContentTranslation> = {
       cta: 'Empezar Ahora'
     },
     intro: {
-      title: 'Educación e Innovación',
+      title: 'Educacción e Innovación',
       description: 'El ecosistema Open Source IC permite que estudiantes e investigadores eviten NDAs restrictivos y costos prohibitivos de licencia.',
       bullets: [
         'Acceso gratuito a PDKs de 130nm y 180nm.',
@@ -221,7 +221,7 @@ export const TRANSLATIONS: Record<LanguageCode, ContentTranslation> = {
           id: 'ihp',
           name: 'IHP SG13G2',
           description: '130nm BiCMOS f_t/f_max 350/450 GHz.',
-          details: 'Tecnología de alto rendimiento para RF y mm-Wave.',
+          details: 'Tecnología de alto rendimiento para RF e mm-Wave.',
           techSummary: 'El proceso SG13G2 de IHP está enfocado en aplicaciones de frecuencia ultra alta, ofreciendo transistores SiGe HBT con un rendimiento excepcional.',
           useCases: ['Sistemas de radar mm-Wave', 'Comunicación 5G/6G', 'Circuitos criogénicos'],
           docsLink: 'https://github.com/IHP-GmbH/IHP-Open-PDK',
@@ -258,7 +258,7 @@ export const TRANSLATIONS: Record<LanguageCode, ContentTranslation> = {
         { id: 'ngspice', name: 'Ngspice', category: 'Simulación', description: 'Simulador SPICE de señal mixta.', website: 'https://ngspice.sourceforge.io/', installTip: 'Integrado con Xschem y KiCad.' },
         { id: 'magic', name: 'Magic VLSI', category: 'Layout', description: 'Layout VLSI con DRC en tiempo real.', website: 'http://opencircuitdesign.com/magic/', installTip: 'Esencial para la verificación física.' },
         { id: 'klayout', name: 'KLayout', category: 'Máscaras', description: 'Editor y visualizador de GDSII/OASIS.', website: 'https://www.klayout.de/', installTip: 'Excelente soporte para scripting en Python.' },
-        { id: 'openems', name: 'OpenEMS', category: 'EM', description: 'Simulador electromagnético 3D FDTD.', website: 'https://openems.de/', installTip: 'Modelado de antenas e inductores.' },
+        { id: 'openems', name: 'OpenEMS', category: 'EM', description: 'Simulador electromagnético 3D FDTD.', website: 'https://openems.de/', installTip: 'Modelado de antenas e indutores.' },
         { id: 'openvaf', name: 'OpenVAF', category: 'Modelado', description: 'Compilador moderno de Verilog-A.', website: 'https://openvaf.semimod.de/', installTip: 'Úselo para modelos compactos de dispositivos.' }
       ]
     },

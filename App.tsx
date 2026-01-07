@@ -20,8 +20,9 @@ const App: React.FC = () => {
   const [isSearchFocused, setIsSearchFocused] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(() => {
     if (typeof window !== 'undefined') {
-      return localStorage.getItem('darkMode') === 'true' || 
-             (!('darkMode' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches);
+      const saved = localStorage.getItem('darkMode');
+      if (saved !== null) return saved === 'true';
+      return window.matchMedia('(prefers-color-scheme: dark)').matches;
     }
     return false;
   });
@@ -36,8 +37,10 @@ const App: React.FC = () => {
   useEffect(() => {
     if (isDarkMode) {
       document.documentElement.classList.add('dark');
+      document.body.style.backgroundColor = '#000000';
     } else {
       document.documentElement.classList.remove('dark');
+      document.body.style.backgroundColor = '#ffffff';
     }
     localStorage.setItem('darkMode', String(isDarkMode));
   }, [isDarkMode]);
@@ -109,8 +112,8 @@ const App: React.FC = () => {
   const ThemeToggle = () => (
     <button
       onClick={() => setIsDarkMode(!isDarkMode)}
-      className="p-2.5 rounded-xl bg-slate-100 dark:bg-zinc-900 text-slate-600 dark:text-zinc-300 hover:bg-slate-200 dark:hover:bg-zinc-800 transition-all border border-slate-200 dark:border-zinc-800"
-      aria-label="Toggle Dark Mode"
+      className="p-2 rounded-lg bg-slate-100 dark:bg-zinc-900 text-slate-600 dark:text-zinc-300 hover:bg-slate-200 dark:hover:bg-zinc-800 transition-all border border-slate-200 dark:border-zinc-800 shadow-sm"
+      aria-label="Alternar Modo Escuro"
     >
       {isDarkMode ? <SunIcon /> : <MoonIcon />}
     </button>
@@ -128,130 +131,130 @@ const App: React.FC = () => {
   };
 
   return (
-    <div className={`min-h-screen flex flex-col md:flex-row bg-white dark:bg-black transition-colors duration-400`}>
-      {/* Sidebar Desktop */}
-      <aside className="hidden md:flex flex-col w-72 h-screen sticky top-0 bg-white dark:bg-black border-r border-slate-200 dark:border-zinc-900 z-50 transition-colors">
-        <div className="p-6 border-b border-slate-100 dark:border-zinc-900 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="brazil-gradient p-1.5 rounded-lg text-white shadow-sm">
-              <CpuIcon />
+    <div className={`min-h-screen flex flex-col bg-white dark:bg-black transition-colors duration-400`}>
+      {/* Top Language Bar */}
+      <div className="w-full bg-slate-50 dark:bg-zinc-950 border-b border-slate-200 dark:border-zinc-900 py-1.5 px-6 z-[60] sticky top-0 md:relative">
+        <div className="max-w-7xl mx-auto flex justify-end gap-6">
+          {LANGUAGES.map((l) => (
+            <button
+              key={l.code}
+              onClick={() => setLang(l.code)}
+              className={`text-[11px] font-bold tracking-tight uppercase transition-colors hover:text-emerald-500 ${
+                lang === l.code ? 'text-emerald-600 dark:text-emerald-400 underline decoration-2 underline-offset-4' : 'text-slate-500 dark:text-zinc-500'
+              }`}
+            >
+              {l.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div className="flex flex-col md:flex-row flex-1">
+        {/* Sidebar Desktop */}
+        <aside className="hidden md:flex flex-col w-72 h-[calc(100vh-36px)] sticky top-0 bg-white dark:bg-black border-r border-slate-200 dark:border-zinc-900 z-50 transition-colors">
+          <div className="p-6 border-b border-slate-100 dark:border-zinc-900 flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="brazil-gradient p-1.5 rounded-lg text-white shadow-sm">
+                <CpuIcon />
+              </div>
+              <span className="font-bold text-lg text-emerald-900 dark:text-emerald-500 tracking-tight">OpenIC <span className="text-emerald-500 underline decoration-2 underline-offset-4">Hub</span></span>
             </div>
-            <span className="font-bold text-lg text-emerald-900 dark:text-emerald-500 tracking-tight">OpenIC <span className="text-emerald-500 underline decoration-2 underline-offset-4">Hub</span></span>
+            <ThemeToggle />
+          </div>
+          
+          <div className="px-4 pt-6 pb-2" ref={searchRef}>
+            <div className="relative group">
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <svg className="h-4 w-4 text-slate-400 dark:text-zinc-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+              </div>
+              <input
+                type="text"
+                className="block w-full pl-10 pr-3 py-2 border border-slate-200 dark:border-zinc-800 rounded-lg text-sm placeholder-slate-400 dark:placeholder-zinc-600 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 bg-slate-50 dark:bg-zinc-900/50 text-slate-900 dark:text-zinc-100 transition-all"
+                placeholder="Pesquisar..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                onFocus={() => setIsSearchFocused(true)}
+              />
+            </div>
+            {isSearchFocused && searchQuery && (
+              <div className="absolute mt-2 w-full left-0 px-4 z-[100]">
+                <div className="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-xl shadow-2xl max-h-[400px] overflow-y-auto">
+                  {searchResults.length > 0 ? (
+                    searchResults.map((res, i) => (
+                      <button key={i} onClick={() => handleResultClick(res)} className="w-full text-left p-4 hover:bg-emerald-50 dark:hover:bg-emerald-950/30 border-b border-slate-50 dark:border-zinc-800 last:border-0 flex gap-3 group">
+                        <div className="mt-1 h-8 w-8 rounded-lg bg-slate-100 dark:bg-zinc-800 flex items-center justify-center dark:text-zinc-400 group-hover:bg-emerald-100 dark:group-hover:bg-emerald-900 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 shrink-0">
+                          {res.type === 'PDK' ? <CpuIcon /> : res.type === 'Tool' ? <ToolIcon /> : <ExternalLinkIcon />}
+                        </div>
+                        <div>
+                          <div className="flex items-center gap-2 mb-0.5">
+                            <span className="font-bold text-slate-900 dark:text-zinc-100 text-sm">{res.title}</span>
+                            <span className="text-[9px] font-black uppercase text-slate-400 dark:text-zinc-500 border border-slate-200 dark:border-zinc-700 px-1.5 rounded">{res.type}</span>
+                          </div>
+                          <p className="text-xs text-slate-500 dark:text-zinc-400 line-clamp-1">{res.description}</p>
+                        </div>
+                      </button>
+                    ))
+                  ) : (
+                    <div className="p-8 text-center text-sm text-slate-400 dark:text-zinc-500 italic">Nenhum resultado encontrado</div>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+
+          <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
+            <div className="text-[10px] font-bold text-slate-400 dark:text-zinc-600 uppercase tracking-widest px-4 mb-2">Workspace de Projetos</div>
+            <NavItem target="home" icon={<LayersIcon />} label={t.nav.home} />
+            <NavItem target="pdk" icon={<CpuIcon />} label={t.nav.pdk} />
+            <NavItem target="tools" icon={<ToolIcon />} label={t.nav.tools} />
+            <NavItem target="flow" icon={<LayersIcon />} label={t.nav.flow} />
+            <NavItem target="resources" icon={<ExternalLinkIcon />} label={t.nav.resources} />
+          </nav>
+        </aside>
+
+        {/* Mobile Header (Side nav replacement) */}
+        <header className="md:hidden bg-white dark:bg-black border-b border-slate-200 dark:border-zinc-900 p-4 flex items-center justify-between transition-colors sticky top-[36px] z-50">
+          <div className="flex items-center gap-2">
+            <div className="brazil-gradient p-1 rounded-md text-white"><CpuIcon /></div>
+            <span className="font-bold text-emerald-900 dark:text-emerald-500">OpenIC Hub</span>
           </div>
           <ThemeToggle />
-        </div>
-        
-        <div className="px-4 pt-6 pb-2" ref={searchRef}>
-          <div className="relative group">
-            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <svg className="h-4 w-4 text-slate-400 dark:text-zinc-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+        </header>
+
+        {/* Main Content Area */}
+        <main className="flex-1 flex flex-col min-h-screen relative overflow-x-hidden technical-grid transition-colors duration-400">
+          <div className="flex-1 p-6 md:p-10 max-w-7xl w-full mx-auto relative z-10">
+            <div className="flex items-center gap-2 text-xs text-slate-400 dark:text-zinc-500 mb-8 px-1">
+              <span className="hover:text-emerald-600 dark:hover:text-emerald-500 cursor-pointer" onClick={() => setPage('home')}>Root</span>
+              <span>/</span>
+              <span className="text-slate-600 dark:text-zinc-200 font-bold capitalize bg-slate-100 dark:bg-zinc-900 px-2 py-0.5 rounded border border-slate-200 dark:border-zinc-800">{page === 'home' ? 'Overview' : page}</span>
             </div>
-            <input
-              type="text"
-              className="block w-full pl-10 pr-3 py-2 border border-slate-200 dark:border-zinc-800 rounded-lg text-sm placeholder-slate-400 dark:placeholder-zinc-600 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 bg-slate-50 dark:bg-zinc-900/50 text-slate-900 dark:text-zinc-100 transition-all"
-              placeholder="Search..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              onFocus={() => setIsSearchFocused(true)}
-            />
+            <div className="animate-in">
+              {renderContent()}
+            </div>
           </div>
-          {isSearchFocused && searchQuery && (
-            <div className="absolute mt-2 w-full left-0 px-4 z-[100]">
-              <div className="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-xl shadow-2xl max-h-[400px] overflow-y-auto">
-                {searchResults.length > 0 ? (
-                  searchResults.map((res, i) => (
-                    <button key={i} onClick={() => handleResultClick(res)} className="w-full text-left p-4 hover:bg-emerald-50 dark:hover:bg-emerald-950/30 border-b border-slate-50 dark:border-zinc-800 last:border-0 flex gap-3 group">
-                      <div className="mt-1 h-8 w-8 rounded-lg bg-slate-100 dark:bg-zinc-800 flex items-center justify-center dark:text-zinc-400 group-hover:bg-emerald-100 dark:group-hover:bg-emerald-900 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 shrink-0">
-                        {res.type === 'PDK' ? <CpuIcon /> : res.type === 'Tool' ? <ToolIcon /> : <ExternalLinkIcon />}
-                      </div>
-                      <div>
-                        <div className="flex items-center gap-2 mb-0.5">
-                          <span className="font-bold text-slate-900 dark:text-zinc-100 text-sm">{res.title}</span>
-                          <span className="text-[9px] font-black uppercase text-slate-400 dark:text-zinc-500 border border-slate-200 dark:border-zinc-700 px-1.5 rounded">{res.type}</span>
-                        </div>
-                        <p className="text-xs text-slate-500 dark:text-zinc-400 line-clamp-1">{res.description}</p>
-                      </div>
-                    </button>
-                  ))
-                ) : (
-                  <div className="p-8 text-center text-sm text-slate-400 dark:text-zinc-500 italic">No results found</div>
-                )}
+
+          {/* Footer */}
+          <footer className="mt-12 py-10 px-10 bg-white dark:bg-black border-t border-slate-200 dark:border-zinc-900 transition-colors">
+            <div className="flex flex-col md:flex-row justify-between items-center gap-6 text-[11px] text-slate-400 dark:text-zinc-500 font-semibold tracking-wide uppercase">
+              <p>&copy; {new Date().getFullYear()} OpenSource IC Brazil. {t.footer.rights}</p>
+              <div className="flex gap-8">
+                <a href="https://github.com/IHP-GmbH/IHP-Open-PDK" target="_blank" className="hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">GitHub Repository</a>
+                <a href="https://www.ufrgs.br/cadmicro/ciaberto/" target="_blank" className="hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">CI Aberto Initiative</a>
               </div>
             </div>
-          )}
-        </div>
+          </footer>
 
-        <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
-          <div className="text-[10px] font-bold text-slate-400 dark:text-zinc-600 uppercase tracking-widest px-4 mb-2">Projects & Workspace</div>
-          <NavItem target="home" icon={<LayersIcon />} label={t.nav.home} />
-          <NavItem target="pdk" icon={<CpuIcon />} label={t.nav.pdk} />
-          <NavItem target="tools" icon={<ToolIcon />} label={t.nav.tools} />
-          <NavItem target="flow" icon={<LayersIcon />} label={t.nav.flow} />
-          <NavItem target="resources" icon={<ExternalLinkIcon />} label={t.nav.resources} />
-        </nav>
-
-        <div className="p-4 border-t border-slate-100 dark:border-zinc-900">
-          <div className="flex items-center bg-slate-100 dark:bg-zinc-900 p-1 rounded-lg w-full">
-            {LANGUAGES.map((l) => (
-              <button key={l.code} onClick={() => setLang(l.code)} className={`flex-1 py-1.5 text-[10px] font-bold rounded-md transition-all ${lang === l.code ? 'bg-white dark:bg-zinc-800 text-emerald-600 dark:text-emerald-400 shadow-sm' : 'text-slate-500 dark:text-zinc-500 hover:text-slate-800 dark:hover:text-zinc-200'}`}>
-                {l.label}
-              </button>
-            ))}
-          </div>
-        </div>
-      </aside>
-
-      {/* Mobile Header */}
-      <header className="md:hidden bg-white dark:bg-black border-b border-slate-200 dark:border-zinc-900 sticky top-0 z-50 p-4 flex items-center justify-between transition-colors">
-        <div className="flex items-center gap-2">
-          <div className="brazil-gradient p-1 rounded-md text-white"><CpuIcon /></div>
-          <span className="font-bold text-emerald-900 dark:text-emerald-500">OpenIC Hub</span>
-        </div>
-        <div className="flex gap-4 items-center">
-          <ThemeToggle />
-          <div className="flex gap-1">
-            {LANGUAGES.map((l) => (
-              <button key={l.code} onClick={() => setLang(l.code)} className={`px-2 py-1 text-[10px] font-bold rounded ${lang === l.code ? 'bg-emerald-100 dark:bg-emerald-900 text-emerald-700 dark:text-emerald-400' : 'text-slate-400 dark:text-zinc-600'}`}>
-                {l.label}
-              </button>
-            ))}
-          </div>
-        </div>
-      </header>
-
-      {/* Main Content */}
-      <main className="flex-1 flex flex-col min-h-screen relative overflow-x-hidden technical-grid transition-colors duration-400">
-        <div className="flex-1 p-6 md:p-10 max-w-7xl w-full mx-auto relative z-10">
-          <div className="flex items-center gap-2 text-xs text-slate-400 dark:text-zinc-500 mb-8 px-1">
-            <span className="hover:text-emerald-600 dark:hover:text-emerald-500 cursor-pointer" onClick={() => setPage('home')}>Root</span>
-            <span>/</span>
-            <span className="text-slate-600 dark:text-zinc-200 font-bold capitalize bg-slate-100 dark:bg-zinc-900 px-2 py-0.5 rounded border border-slate-200 dark:border-zinc-800">{page === 'home' ? 'Overview' : page}</span>
-          </div>
-          <div className="animate-in">
-            {renderContent()}
-          </div>
-        </div>
-
-        {/* Footer */}
-        <footer className="mt-12 py-10 px-10 bg-white dark:bg-black border-t border-slate-200 dark:border-zinc-900 transition-colors">
-          <div className="flex flex-col md:flex-row justify-between items-center gap-6 text-[11px] text-slate-400 dark:text-zinc-500 font-semibold tracking-wide uppercase">
-            <p>&copy; {new Date().getFullYear()} OpenSource IC Brazil. {t.footer.rights}</p>
-            <div className="flex gap-8">
-              <a href="https://github.com/IHP-GmbH/IHP-Open-PDK" target="_blank" className="hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">GitHub Repository</a>
-              <a href="https://www.ufrgs.br/cadmicro/ciaberto/" target="_blank" className="hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">CI Aberto Initiative</a>
-            </div>
-          </div>
-        </footer>
-
-        {/* Mobile Bottom Nav */}
-        <nav className="md:hidden sticky bottom-0 left-0 right-0 bg-white dark:bg-black border-t border-slate-200 dark:border-zinc-900 px-4 py-2 flex justify-around items-center z-50 shadow-[0_-4px_12px_rgba(0,0,0,0.08)] transition-colors">
-           <MobileNavItem active={page === 'home'} icon={<LayersIcon />} onClick={() => setPage('home')} />
-           <MobileNavItem active={page === 'pdk'} icon={<CpuIcon />} onClick={() => setPage('pdk')} />
-           <MobileNavItem active={page === 'tools'} icon={<ToolIcon />} onClick={() => setPage('tools')} />
-           <MobileNavItem active={page === 'flow'} icon={<LayersIcon />} onClick={() => setPage('flow')} />
-           <MobileNavItem active={page === 'resources'} icon={<ExternalLinkIcon />} onClick={() => setPage('resources')} />
-        </nav>
-      </main>
+          {/* Mobile Bottom Nav */}
+          <nav className="md:hidden sticky bottom-0 left-0 right-0 bg-white dark:bg-black border-t border-slate-200 dark:border-zinc-900 px-4 py-2 flex justify-around items-center z-50 shadow-[0_-4px_12px_rgba(0,0,0,0.08)] transition-colors">
+             <MobileNavItem active={page === 'home'} icon={<LayersIcon />} onClick={() => setPage('home')} />
+             <MobileNavItem active={page === 'pdk'} icon={<CpuIcon />} onClick={() => setPage('pdk')} />
+             <MobileNavItem active={page === 'tools'} icon={<ToolIcon />} onClick={() => setPage('tools')} />
+             <MobileNavItem active={page === 'flow'} icon={<LayersIcon />} onClick={() => setPage('flow')} />
+             <MobileNavItem active={page === 'resources'} icon={<ExternalLinkIcon />} onClick={() => setPage('resources')} />
+          </nav>
+        </main>
+      </div>
     </div>
   );
 };
@@ -384,7 +387,7 @@ const ResourcesPage: React.FC<{ t: any }> = ({ t }) => (
     <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
       {RESOURCES.map((link, idx) => (
         <a key={idx} href={link.url} target="_blank" rel="noopener noreferrer" className="flex flex-col p-8 bg-white dark:bg-zinc-950 rounded-[2rem] border border-slate-200 dark:border-zinc-900 shadow-sm hover:border-emerald-300 dark:hover:border-emerald-600 hover:shadow-2xl transition-all group">
-          <div className="flex items-center justify-between mb-6"><div className={`p-3 rounded-2xl ${link.type === 'github' ? 'bg-slate-100 dark:bg-zinc-900 text-slate-600 dark:text-zinc-400' : 'bg-emerald-50 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400'}`}>{link.type === 'github' ? <ToolIcon /> : <ExternalLinkIcon />}</div><span className="text-[10px] font-black text-slate-400 dark:text-zinc-600 uppercase tracking-[0.2em]">{link.type}</span></div>
+          <div className="flex items-center justify-between mb-6"><div className={`p-3 rounded-2xl ${link.type === 'github' ? 'bg-slate-100 dark:bg-zinc-800 text-slate-600 dark:text-slate-400' : 'bg-emerald-50 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400'}`}>{link.type === 'github' ? <ToolIcon /> : <ExternalLinkIcon />}</div><span className="text-[10px] font-black text-slate-400 dark:text-zinc-600 uppercase tracking-[0.2em]">{link.type}</span></div>
           <h4 className="font-extrabold text-xl text-slate-900 dark:text-white group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors mb-3 tracking-tight">{link.title}</h4><p className="text-sm text-slate-500 dark:text-zinc-400 leading-relaxed font-medium">{link.description}</p>
         </a>
       ))}
