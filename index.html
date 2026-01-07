@@ -10,18 +10,23 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg-color: #f4f5f7;
-      --grid-color: rgba(0,0,0,0.03);
+      --bg-color: #ffffff;
+      --grid-color: rgba(0, 0, 0, 0.04);
+      --card-bg: #ffffff;
+      --text-main: #0f172a;
     }
     .dark {
-      --bg-color: #020617;
-      --grid-color: rgba(255,255,255,0.03);
+      --bg-color: #000000;
+      --grid-color: rgba(255, 255, 255, 0.05);
+      --card-bg: #0a0a0a;
+      --text-main: #f8fafc;
     }
     body {
       font-family: 'Inter', sans-serif;
       scroll-behavior: smooth;
       background-color: var(--bg-color);
-      transition: background-color 0.3s ease;
+      color: var(--text-main);
+      transition: background-color 0.4s cubic-bezier(0.4, 0, 0.2, 1), color 0.4s ease;
     }
     .mono {
       font-family: 'JetBrains Mono', monospace;
@@ -33,7 +38,7 @@
       background-image: 
         linear-gradient(to right, var(--grid-color) 1px, transparent 1px),
         linear-gradient(to bottom, var(--grid-color) 1px, transparent 1px);
-      background-size: 20px 20px;
+      background-size: 32px 32px;
     }
     @keyframes fadeIn {
       from { opacity: 0; transform: translateY(10px); }
@@ -43,8 +48,15 @@
       animation: fadeIn 0.4s ease-out forwards;
     }
     .organic-pattern {
-      background-image: radial-gradient(#10b981 0.5px, transparent 0.5px);
+      background-image: radial-gradient(#10b981 0.8px, transparent 0.8px);
       background-size: 24px 24px;
+    }
+    
+    /* Smooth transitions for all theme-affected elements */
+    * {
+      transition-property: background-color, border-color, color, fill, stroke;
+      transition-duration: 400ms;
+      transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
     }
   </style>
   <script type="importmap">
@@ -58,7 +70,7 @@
   }
   </script>
 </head>
-<body class="text-slate-900 antialiased overflow-x-hidden">
+<body class="antialiased overflow-x-hidden">
   <div id="root"></div>
   <script type="module" src="index.tsx"></script>
 </body>
