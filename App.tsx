@@ -42,7 +42,7 @@ const ChatWidget: React.FC<{ isOpen: boolean; onClose: () => void }> = ({ isOpen
     try {
       const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
       const responseStream = await ai.models.generateContentStream({
-        model: 'gemini-2.5-flash-lite-latest',
+        model: 'gemini-3-flash-preview',
         contents: [...messages, userMessage].map(m => ({
           role: m.role,
           parts: [{ text: m.text }]
@@ -322,7 +322,7 @@ const App: React.FC = () => {
               className="w-full flex items-center gap-2 px-2.5 py-2 bg-emerald-600 text-white rounded text-[11px] font-bold hover:bg-emerald-700 transition-all active:scale-95 shadow-md"
             >
               <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" /></svg>
-              AI Assistant (Lite)
+              AI Assistant
             </button>
           </div>
         </aside>
