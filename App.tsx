@@ -1,8 +1,8 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { TRANSLATIONS, LANGUAGES, LanguageCode, RESOURCES } from './constants.tsx';
 import { CpuIcon, LayersIcon, ExternalLinkIcon, ToolIcon, SunIcon, MoonIcon } from './components/Icons.tsx';
 import { PDKOption, Tool, FlowStep } from './types.ts';
+import { GoogleGenAI } from "@google/genai";
 
 type Page = 'home' | 'pdk' | 'tools' | 'analog-flow' | 'digital-flow' | 'resources';
 
@@ -14,11 +14,140 @@ interface SearchResult {
   id?: string;
 }
 
+interface Message {
+  role: 'user' | 'model';
+  text: string;
+}
+
+const ChatWidget: React.FC<{ isOpen: boolean; onClose: () => void }> = ({ isOpen, onClose }) => {
+  const [input, setInput] = useState('');
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [isTyping, setIsTyping] = useState(false);
+  const scrollRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+    }
+  }, [messages]);
+
+  const handleSend = async () => {
+    if (!input.trim() || isTyping) return;
+
+    const userMessage: Message = { role: 'user', text: input };
+    setMessages(prev => [...prev, userMessage]);
+    setInput('');
+    setIsTyping(true);
+
+    try {
+      const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+      const responseStream = await ai.models.generateContentStream({
+        model: 'gemini-2.5-flash-lite-latest',
+        contents: [...messages, userMessage].map(m => ({
+          role: m.role,
+          parts: [{ text: m.text }]
+        })),
+        config: {
+          systemInstruction: "You are an expert AI Assistant for the OpenSource IC Hub. Your expertise lies in semiconductor design, OpenPDKs (IHP SG13G2, SkyWater SKY130), and EDA tools (Xschem, Magic, OpenROAD, Ngspice). Be concise, technical, and helpful. Format your responses with clear spacing.",
+          temperature: 0.2,
+        }
+      });
+
+      let fullText = '';
+      setMessages(prev => [...prev, { role: 'model', text: '' }]);
+
+      for await (const chunk of responseStream) {
+        const text = chunk.text;
+        if (text) {
+          fullText += text;
+          setMessages(prev => {
+            const last = prev[prev.length - 1];
+            const updated = [...prev];
+            updated[updated.length - 1] = { ...last, text: fullText };
+            return updated;
+          });
+        }
+      }
+    } catch (error) {
+      console.error("AI Error:", error);
+      setMessages(prev => [...prev, { role: 'model', text: 'Desculpe, tive um problema ao processar sua solicitação. Verifique sua conexão.' }]);
+    } finally {
+      setIsTyping(false);
+    }
+  };
+
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed bottom-4 right-4 w-[320px] md:w-[380px] h-[480px] bg-white dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded-2xl shadow-2xl flex flex-col z-[100] animate-in overflow-hidden transition-colors">
+      <div className="p-3 border-b border-slate-100 dark:border-zinc-900 bg-slate-50/50 dark:bg-zinc-900/30 flex justify-between items-center">
+        <div className="flex items-center gap-2">
+          <div className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
+          <span className="text-xs font-black uppercase tracking-widest text-slate-500 dark:text-zinc-400">OpenIC Assistant</span>
+        </div>
+        <button onClick={onClose} className="p-1 hover:bg-slate-200 dark:hover:bg-zinc-800 rounded transition-colors text-slate-400">
+          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+        </button>
+      </div>
+      <div ref={scrollRef} className="flex-1 overflow-y-auto p-4 space-y-4 scrollbar-hide">
+        {messages.length === 0 && (
+          <div className="h-full flex flex-col items-center justify-center text-center p-4">
+            <CpuIcon size={32} className="text-emerald-500 mb-3 opacity-50" />
+            <p className="text-xs text-slate-400 dark:text-zinc-500 font-medium leading-relaxed">Olá! Como posso ajudar com seu projeto de CI ou dúvidas sobre o ecossistema OpenSource?</p>
+          </div>
+        )}
+        {messages.map((m, i) => (
+          <div key={i} className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+            <div className={`max-w-[85%] p-3 rounded-xl text-[13px] leading-relaxed ${
+              m.role === 'user' 
+                ? 'bg-emerald-600 text-white shadow-sm' 
+                : 'bg-slate-100 dark:bg-zinc-900 text-slate-700 dark:text-zinc-300'
+            }`}>
+              {m.text}
+            </div>
+          </div>
+        ))}
+        {isTyping && (
+          <div className="flex justify-start">
+            <div className="bg-slate-100 dark:bg-zinc-900 p-3 rounded-xl">
+              <div className="flex gap-1">
+                <div className="w-1 h-1 bg-emerald-500 rounded-full animate-bounce" />
+                <div className="w-1 h-1 bg-emerald-500 rounded-full animate-bounce [animation-delay:0.2s]" />
+                <div className="w-1 h-1 bg-emerald-500 rounded-full animate-bounce [animation-delay:0.4s]" />
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+      <div className="p-3 border-t border-slate-100 dark:border-zinc-900 bg-white dark:bg-black">
+        <div className="flex gap-2">
+          <input
+            type="text"
+            className="flex-1 bg-slate-50 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-lg px-3 py-2 text-xs focus:outline-none focus:ring-1 focus:ring-emerald-500 text-slate-900 dark:text-white"
+            placeholder="Pergunte sobre IHP, SKY130 ou Ferramentas..."
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            onKeyDown={(e) => e.key === 'Enter' && handleSend()}
+          />
+          <button
+            onClick={handleSend}
+            disabled={!input.trim() || isTyping}
+            className="p-2 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white rounded-lg transition-all active:scale-95"
+          >
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" /></svg>
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 const App: React.FC = () => {
   const [lang, setLang] = useState<LanguageCode>('pt');
   const [page, setPage] = useState<Page>('home');
   const [searchQuery, setSearchQuery] = useState('');
   const [isSearchFocused, setIsSearchFocused] = useState(false);
+  const [isChatOpen, setIsChatOpen] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(() => {
     if (typeof window !== 'undefined') {
       const saved = localStorage.getItem('darkMode');
@@ -97,7 +226,6 @@ const App: React.FC = () => {
       }`}
     >
       <span className={`shrink-0 ${page === target ? 'text-emerald-600 dark:text-emerald-500' : 'text-slate-400 dark:text-zinc-600'}`}>
-        {/* Fix: Added <any> cast to ensure React.cloneElement accepts injected sizing props */}
         {React.cloneElement(icon as React.ReactElement<any>, { size: 16, width: 16, height: 16 })}
       </span>
       <span className="text-left truncate">{label}</span>
@@ -187,6 +315,16 @@ const App: React.FC = () => {
             <div className="text-[9px] font-bold text-slate-400 dark:text-zinc-600 uppercase tracking-widest px-2.5 mb-1 mt-3">Comunidade</div>
             <NavItem target="resources" icon={<ExternalLinkIcon />} label={t.nav.resources} />
           </nav>
+
+          <div className="p-2.5 border-t border-slate-100 dark:border-zinc-900">
+            <button 
+              onClick={() => setIsChatOpen(true)}
+              className="w-full flex items-center gap-2 px-2.5 py-2 bg-emerald-600 text-white rounded text-[11px] font-bold hover:bg-emerald-700 transition-all active:scale-95 shadow-md"
+            >
+              <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" /></svg>
+              AI Assistant (Lite)
+            </button>
+          </div>
         </aside>
 
         {/* Mobile Header */}
@@ -222,13 +360,22 @@ const App: React.FC = () => {
           </nav>
         </main>
       </div>
+
+      {/* Floating Chat Trigger for Mobile */}
+      <button 
+        onClick={() => setIsChatOpen(true)}
+        className="md:hidden fixed bottom-20 right-4 w-12 h-12 bg-emerald-600 text-white rounded-full shadow-2xl flex items-center justify-center z-[90] active:scale-90 transition-all"
+      >
+        <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" /></svg>
+      </button>
+
+      <ChatWidget isOpen={isChatOpen} onClose={() => setIsChatOpen(false)} />
     </div>
   );
 };
 
 const MobileNavItem: React.FC<{ active: boolean; icon: React.ReactNode; onClick: () => void }> = ({ active, icon, onClick }) => (
   <button onClick={onClick} className={`p-2.5 rounded-xl transition-all ${active ? 'bg-emerald-600 text-white shadow-md' : 'text-slate-400 dark:text-zinc-600 active:scale-95'}`}>
-    {/* Fix: Added <any> cast to ensure React.cloneElement accepts injected sizing props */}
     {React.cloneElement(icon as React.ReactElement<any>, { size: 18 })}
   </button>
 );
