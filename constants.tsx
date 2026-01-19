@@ -243,6 +243,7 @@ export const TRANSLATIONS: Record<LanguageCode, any> = {
 export const RESOURCES: ResourceLink[] = [
   { title: 'IHP OpenPDK (GitHub)', url: 'https://github.com/IHP-GmbH/IHP-Open-PDK', type: 'github', description: 'The official source for the SG13G2 Open PDK.' },
   { title: 'SkyWater Open PDK Docs', url: 'https://skywater-pdk.readthedocs.io/', type: 'docs', description: 'Complete reference for the SKY130 process.' },
+  { title: 'IIC-OSIC-TOOLS (Docker)', url: 'https://github.com/iic-jku/IIC-OSIC-TOOLS', type: 'github', description: 'All-in-one Docker/Podman container for open-source analog and digital IC design flows.' },
   { title: 'CI Aberto (Brazil)', url: 'https://www.ufrgs.br/cadmicro/ciaberto/', type: 'community', description: 'Brazilian initiative for open hardware curation.' },
   { title: 'One Student One Chip (ysyx)', url: 'https://ysyx.org/en/', type: 'community', description: 'A massive learning-by-doing program from China.' },
   { title: 'Efabless Open MPW', url: 'https://efabless.com/open_shuttle_program', type: 'community', description: 'Apply for free silicon manufacturing.' },

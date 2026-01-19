@@ -2,7 +2,7 @@
 import React from 'react';
 
 // Added IconProps to support dynamic sizing and other standard SVG props via React.cloneElement
-interface IconProps extends React.SVGProps<SVGSVGElement> {
+interface IconProps extends React.ComponentProps<'svg'> {
   size?: number | string;
 }
 
